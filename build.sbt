@@ -5,6 +5,9 @@ lazy val supportedScalaVersions = List(scala213, scala3)
 ThisBuild / organization := "sqids"
 ThisBuild / scalaVersion := scala213
 
+// Remove when first release is done
+ThisBuild / mimaFailOnNoPrevious := false
+
 lazy val sqids = (project in file("."))
   .settings(
     name := "sqids-scala",
@@ -46,3 +49,17 @@ lazy val sqids = (project in file("."))
     },
     crossScalaVersions := supportedScalaVersions
   )
+
+def addCommandsAlias(name: String, values: List[String]) =
+  addCommandAlias(name, values.mkString(";", ";", ""))
+
+addCommandsAlias(
+  "validate",
+  List(
+    "+clean",
+    "+test",
+    "+mimaReportBinaryIssues",
+    "scalafmtCheckAll",
+    "scalafmtSbtCheck"
+  )
+)
