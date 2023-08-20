@@ -46,7 +46,7 @@ sealed abstract case class Alphabet(value: String) {
 
   def getOffset(numbers: List[Long]): Int =
     numbers.indices.foldLeft(numbers.length) { (offset, i) =>
-      offset + i + value(numbers(i).toInt % length)
+      offset + i + value((numbers(i) % length.toLong).toInt)
     } % length
 
   def rearrange(offset: Int): Alphabet =
