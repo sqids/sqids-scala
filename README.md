@@ -84,15 +84,22 @@ Sqids
 
 Prevent specific words from appearing anywhere in the auto-generated IDs:
 
+(Blocked ids/words does still decode to correct numbers)
 ```scala
 import sqids.options.Blocklist
 import sqids.Sqids
-val sqids = Sqids.withBlocklist(Blocklist(Set("word1", "word2")))
+
+val sqids = Sqids.withBlocklist(Blocklist(Set("8QRLaD", "7T1cd0dL")))
 val id = sqids.encodeUnsafeString(1, 2, 3) 
 // "8QRLaD"
 
 sqids.decode(id)
 // List(1, 2, 3)
+sqids.decode("8QRLaD")
+// List(1, 2, 3)
+sqids.decode("7T1cd0dL")
+// List(1, 2, 3)
+
 ```
 
 ## 📝 License
