@@ -8,7 +8,7 @@ ThisBuild / scalaVersion := scala213
 lazy val sqids = (project in file("."))
   .settings(
     name := "sqids-scala",
-    version := "0.1.1-SNAPSHOT",
+    version := "0.1.0",
     libraryDependencies ++= Seq(
       "org.scalameta" %% "munit-scalacheck" % "0.7.29" % Test
     ),
