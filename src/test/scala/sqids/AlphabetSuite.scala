@@ -5,7 +5,7 @@ import sqids.options.Alphabet
 
 class AlphabetSuite extends ScalaCheckSuite {
   test("simple") {
-    val numbers = List(1, 2, 3)
+    val numbers: List[Long] = List(1, 2, 3)
     val id = "4d9fd2"
     Alphabet("0123456789abcdef")
       .flatMap(Sqids.forAlphabet)
@@ -16,14 +16,14 @@ class AlphabetSuite extends ScalaCheckSuite {
   }
 
   test("short alphabet") {
-    val numbers = List(1, 2, 3)
+    val numbers: List[Long] = List(1, 2, 3)
     Alphabet("abcde")
       .flatMap(Sqids.forAlphabet)
       .foreach(sqids => assertEquals(sqids.decode(sqids.encodeUnsafeString(numbers: _*)), numbers))
   }
 
   test("long alphabet") {
-    val numbers = List(1, 2, 3)
+    val numbers: List[Long] = List(1, 2, 3)
     Alphabet(
       "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_+|{}[];:'\"/?.>,<`~"
     )

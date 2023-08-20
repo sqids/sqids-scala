@@ -8,7 +8,7 @@ final class SqidsSuite_minLength extends ScalaCheckSuite {
   val sqids = SqidsOptions.default.withMinLength(SqidsOptions.default.alphabet.length).map(Sqids.apply)
   sqids.foreach { sqids =>
     test("simple") {
-      val numbers = List(1, 2, 3);
+      val numbers: List[Long] = List(1, 2, 3)
       val id = "75JILToVsGerOADWmHlY38xvbaNZKQ9wdFS0B6kcMEtnRpgizhjU42qT1cd0dL"
       assertEquals(sqids.encodeUnsafeString(numbers: _*), id)
       assertEquals(sqids.decode(id), numbers)
@@ -56,7 +56,7 @@ final class SqidsSuite_minLength extends ScalaCheckSuite {
           0,
           9
         )
-      )
+      ).view.mapValues(_.map(_.toLong))
 
       ids.foreach { case (id, numbers) =>
         assertEquals(sqids.encodeUnsafeString(numbers: _*), id)
@@ -69,11 +69,11 @@ final class SqidsSuite_minLength extends ScalaCheckSuite {
       List(0, 1, 5, 10, SqidsOptions.default.alphabet.value.length).foreach(minLength =>
         List(
           List(sqids.minValue),
-          List(0, 0, 0, 0, 0),
-          List(1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
-          List(100, 200, 300),
-          List(1000, 2000, 3000),
-          List(1000000),
+          List(0L, 0L, 0L, 0L, 0L),
+          List(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L),
+          List(100L, 200L, 300L),
+          List(1000L, 2000L, 3000L),
+          List(1000000L),
           List(sqids.maxValue)
         ).foreach { numbers =>
           SqidsOptions.default.withMinLength(minLength).map(Sqids.apply).foreach { sqids =>
@@ -83,7 +83,6 @@ final class SqidsSuite_minLength extends ScalaCheckSuite {
           }
         }
       )
-
     }
 
     test("out-of-range invalid min length") {

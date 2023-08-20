@@ -7,12 +7,12 @@ import sqids.options.Blocklist
 final case class Sqid(
   value: String,
   alphabet: Alphabet,
-  numbers: List[Int],
+  numbers: List[Long],
   partitioned: Boolean,
   originalAlphabet: Alphabet
 ) {
   override def toString = value
-  def withNextnr(nr: Int) = append(alphabet.removeSeparator.toId(nr))
+  def withNextnr(nr: Long) = append(alphabet.removeSeparator.toId(nr))
   def addSeparator = append(alphabet.separator.toString)
   def addPartitionOrSeparator(partition: String, shouldAddPartition: Boolean) =
     if (shouldAddPartition) append(partition)
@@ -27,19 +27,19 @@ final case class Sqid(
     )
   def shuffle = copy(alphabet = alphabet.shuffle)
 
-  def handleBlocked(blocklist: Blocklist, maxValue: Int): Either[SqidsError, Sqid] =
+  def handleBlocked(blocklist: Blocklist, maxValue: Long): Either[SqidsError, Sqid] =
     if (blocklist.isBlocked(value)) {
-      val newNumbers: Either[SqidsError, List[Int]] =
+      val newNumbers: Either[SqidsError, List[Long]] =
         if (partitioned)
           // Here we have a true cornercase, we have to find
           // 2 147 483 647 sequential iterations of a blocked id
           // before this happens 😅
-          if (numbers.head + 1 > maxValue)
+          if (numbers.head + 1L > maxValue)
             Left(SqidsError.OutOfRange("Ran out of range checking against the blocklist"))
           else
-            Right(numbers.head + 1 :: numbers.tail)
+            Right(numbers.head + 1L :: numbers.tail)
         else
-          Right(0 :: numbers)
+          Right(0L :: numbers)
 
       newNumbers.flatMap(numbers =>
         Sqid
@@ -61,7 +61,7 @@ final case class Sqid(
 
 object Sqid {
   def fromNumbers(
-    numbers: List[Int],
+    numbers: List[Long],
     a: Alphabet,
     partitioned: Boolean
   ): Sqid = {
@@ -69,7 +69,7 @@ object Sqid {
 
     @tailrec
     def go(
-      numbers: List[Int],
+      numbers: List[Long],
       sqid: Sqid,
       first: Boolean
     ): Sqid =

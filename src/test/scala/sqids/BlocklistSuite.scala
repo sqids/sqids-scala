@@ -27,11 +27,11 @@ final class BlocklistSuite extends ScalaCheckSuite {
   }
   test("if a non-empty blocklist param passed, use only that") {
     val sqids = Sqids.withBlocklist(Blocklist(Set("AvTg")))
-    assertEquals(sqids.decode("sexy"), List(200044))
+    assertEquals(sqids.decode("sexy"), List(200044L))
     assertEquals(sqids.encodeUnsafeString(200044), "sexy")
-    assertEquals(sqids.decode("AvTg"), List(100000))
+    assertEquals(sqids.decode("AvTg"), List(100000L))
     assertEquals(sqids.encodeUnsafeString(100000), "7T1X8k")
-    assertEquals(sqids.decode("7T1X8k"), List(100000))
+    assertEquals(sqids.decode("7T1X8k"), List(100000L))
 
   }
   test("only block functionality") {
@@ -48,7 +48,7 @@ final class BlocklistSuite extends ScalaCheckSuite {
       incrementalBlockList
     )
     assertEquals(sqids.encodeUnsafeString(1, 2, 3), "TM0x1Mxz")
-    assertEquals(sqids.decode("TM0x1Mxz"), List(1, 2, 3));
+    assertEquals(sqids.decode("TM0x1Mxz"), List(1L, 2L, 3L));
   }
 
   test("decoding blocklist words should still work") {
@@ -64,10 +64,10 @@ final class BlocklistSuite extends ScalaCheckSuite {
         blocklist
       )
     )
-    blocklist.foreach(id => assertEquals(sqids.decode(id), List(1, 2, 3)))
+    blocklist.foreach(id => assertEquals(sqids.decode(id), List(1L, 2L, 3L)))
   }
   test("match against a short blocklist word") {
     val sqids = Sqids.withBlocklist(Blocklist(Set("pPQ")))
-    assertEquals(sqids.decode(sqids.encodeUnsafeString(1, 2, 3)), List(1, 2, 3))
+    assertEquals(sqids.decode(sqids.encodeUnsafeString(1, 2, 3)), List(1L, 2L, 3L))
   }
 }
