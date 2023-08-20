@@ -1,9 +1,7 @@
 package sqids.options
 
-import scala.util.control.NoStackTrace
 import scala.annotation.tailrec
-
-final case class InvalidAlphabet(override val getMessage: String) extends RuntimeException with NoStackTrace
+import sqids.SqidsError
 
 sealed abstract case class Alphabet(value: String) {
   def length = value.length
@@ -13,6 +11,15 @@ sealed abstract case class Alphabet(value: String) {
   def removePrefixAndPartition: Alphabet = new Alphabet(value.drop(2)) {}
   def removeSeparator: Alphabet = new Alphabet(value.take(value.length - 1)) {}
   def separator: Char = value.last
+  def splitAtSeparator(id: String): Either[String, (String, String)] =
+    (id.takeWhile(_ != separator), id.dropWhile(_ != separator).tail) match {
+      case (first, _) if first.exists(!removeSeparator.value.contains(_)) =>
+        Left("First part have invalid characters")
+      case res => Right(res)
+    }
+
+  def validId(id: String): Boolean =
+    id.forall(c => value.contains(c))
 
   def toId(num: Int): String = {
     @tailrec
@@ -35,6 +42,7 @@ sealed abstract case class Alphabet(value: String) {
       str.updated(i, str(r)).updated(r, iChar)
     }) {}
 
+  def offsetFromPrefix(prefix: Char) = value.indexOf(prefix.toInt)
   def getOffset(numbers: List[Int]): Int =
     numbers.indices.foldLeft(numbers.length) { (offset, i) =>
       offset + i + value(numbers(i) % length)
@@ -48,12 +56,12 @@ sealed abstract case class Alphabet(value: String) {
 }
 
 object Alphabet {
-  def apply(value: String): Either[InvalidAlphabet, Alphabet] =
+  def apply(value: String): Either[SqidsError, Alphabet] =
     value match {
       case v if v.distinct.length != v.length =>
-        Left(InvalidAlphabet("Alphabet must contain unique characters"))
+        Left(SqidsError.AlphabetNotUnique)
       case v if v.length < 5 =>
-        Left(InvalidAlphabet("Alphabet must contain more than 5 characters"))
+        Left(SqidsError.AlphabetTooSmall)
       case v =>
         Right(new Alphabet(v) {})
     }

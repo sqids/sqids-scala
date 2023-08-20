@@ -2,9 +2,17 @@ package sqids
 import munit.ScalaCheckSuite
 import sqids.options.Blocklist
 
-final class SqidsSuite_blockList extends ScalaCheckSuite {
+final class BlocklistSuite extends ScalaCheckSuite {
   val sqids = Sqids.default
-
+  val incrementalBlockList = Blocklist(
+    Set(
+      "8QRLaD", // normal result of 1st encoding, let's block that word on purpose
+      "7T1cd0dL", // result of 2nd encoding
+      "UeIe", // result of 3rd encoding is `RA8UeIe7`, let's block a substring
+      "imhw", // result of 4th encoding is `WM3Limhw`, let's block the postfix
+      "LfUQ" // result of 4th encoding is `LfUQh4HN`, let's block the prefix
+    )
+  )
   test("simple") {
     val numbers = sqids.decode("sexy")
     val encoded = sqids.encodeUnsafeString(numbers: _*)
@@ -27,36 +35,18 @@ final class SqidsSuite_blockList extends ScalaCheckSuite {
 
   }
   test("only block functionality") {
-    val blocklist = Blocklist(
-      Set(
-        "8QRLaD", // normal result of 1st encoding, let's block that word on purpose
-        "7T1cd0dL", // result of 2nd encoding
-        "UeIe", // result of 3rd encoding is `RA8UeIe7`, let's block a substring
-        "imhw", // result of 4th encoding is `WM3Limhw`, let's block the postfix
-        "LfUQ" // result of 4th encoding is `LfUQh4HN`, let's block the prefix
-      )
-    )
     List(
       "8QRLaD",
       "7T1cd0dL", // result of 2nd encoding
       "RA8UeIe7", // result of 3rd encoding is `RA8UeIe7`, let's block a substring
       "WM3Limhw", // result of 4th encoding is `WM3Limhw`, let's block the postfix
       "LfUQh4HN"
-    ).foreach(id => assume(blocklist.isBlocked(id)))
+    ).foreach(id => assume(incrementalBlockList.isBlocked(id)))
   }
   test("blocklist") {
     val sqids = Sqids.withBlocklist(
-      Blocklist(
-        Set(
-          "8QRLaD", // normal result of 1st encoding, let's block that word on purpose
-          "7T1cd0dL", // result of 2nd encoding
-          "UeIe", // result of 3rd encoding is `RA8UeIe7`, let's block a substring
-          "imhw", // result of 4th encoding is `WM3Limhw`, let's block the postfix
-          "LfUQ" // result of 4th encoding is `LfUQh4HN`, let's block the prefix
-        )
-      )
+      incrementalBlockList
     )
-
     assertEquals(sqids.encodeUnsafeString(1, 2, 3), "TM0x1Mxz")
     assertEquals(sqids.decode("TM0x1Mxz"), List(1, 2, 3));
   }

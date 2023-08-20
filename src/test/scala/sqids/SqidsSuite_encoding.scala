@@ -93,7 +93,7 @@ final class SqidsSuite_encoding extends ScalaCheckSuite {
   test("decoding an ID with an invalid character") {
     assertEquals(sqids.decode("*"), List())
   }
-  test("decoding an invalid ID with a repeating reserved character".ignore) {
+  test("decoding an invalid ID with a repeating reserved character") {
     assertEquals(sqids.decode("fff"), List())
   }
   test("encode out-of-range numbers") {

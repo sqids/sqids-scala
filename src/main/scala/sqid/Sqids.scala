@@ -14,12 +14,12 @@ trait Sqids {
   def decode(id: String): List[Int]
   def minValue: Int
   def maxValue: Int
-  def alphabet: Alphabet
 }
 
 object Sqids {
   def forAlphabet(a: Alphabet): Either[InvalidSqidsOptions, Sqids] =
     SqidsOptions.default.withAlphabet(a).map(Sqids.apply)
+
   def withMinLength(minLength: Int): Either[InvalidSqidsOptions, Sqids] =
     SqidsOptions.default.withMinLength(minLength).map(Sqids.apply)
 
@@ -48,8 +48,6 @@ object Sqids {
       override def encode(numbers: Int*): Either[SqidsError, Sqid] =
         encode(numbers.toList)
 
-      override def alphabet: Alphabet = options.alphabet
-
       override def encode(numbers: List[Int]): Either[SqidsError, Sqid] =
         encode_(numbers)
 
@@ -58,10 +56,10 @@ object Sqids {
       override def maxValue: Int = Int.MaxValue
 
       override def decode(input: String): List[Int] =
-        input.toList match {
-          case Nil => List.empty
-          case s if s.exists(c => !_alphabet.value.contains(c)) => List.empty
-          case prefix :: id => getNumbers(prefix, id.mkString)
+        input match {
+          case "" => List.empty
+          case id if !_alphabet.validId(id) => List.empty
+          case id => getNumbers(id.head, id.tail)
         }
 
       private def getNumbers(prefix: Char, id: String): List[Int] = {
@@ -69,32 +67,27 @@ object Sqids {
         def go(
           id: String,
           alphabet: Alphabet,
-          acc: Vector[Int] = Vector.empty
+          acc: Vector[Int]
         ): List[Int] =
           if (id.isEmpty) acc.toList
-          else {
-            val separator = alphabet.separator
-            val withoutSeparator = alphabet.removeSeparator
-            id.split(separator.toString, -1).toList match {
-              case List(c) => (acc :+ withoutSeparator.toNumber(c)).toList
-              case c :: next =>
-                val newId = next.mkString(separator.toString)
-                go(newId, alphabet.shuffle, acc :+ withoutSeparator.toNumber(c))
-              case Nil => acc.toList
+          else
+            alphabet.splitAtSeparator(id) match {
+              case Left(_) => Nil
+              case Right((first, rest)) =>
+                go(rest, alphabet.shuffle, acc :+ alphabet.removeSeparator.toNumber(first))
             }
-          }
 
         val (alphabet, partitionIndex) = {
-          val offset = _alphabet.value.indexOf(prefix.toInt)
+          val offset = _alphabet.offsetFromPrefix(prefix)
           val rearranged = _alphabet.rearrange(offset)
           val partition = rearranged.partition
           (rearranged.removePrefixAndPartition, id.indexOf(partition.toInt))
         }
 
         if (partitionIndex > 0 && partitionIndex < id.length - 1)
-          go(id.drop(partitionIndex + 1), alphabet.shuffle)
+          go(id.drop(partitionIndex + 1), alphabet.shuffle, Vector.empty)
         else
-          go(id, alphabet)
+          go(id, alphabet, Vector.empty)
       }
 
       private def encode_(
@@ -104,7 +97,7 @@ object Sqids {
           case numbers if numbers.exists(i => i > maxValue || i < minValue) =>
             Left(
               SqidsError.OutOfRange(
-                s"some nr is out of range: $numbers, max: $maxValue min: $minValue"
+                s"some nr is out of range: ${numbers.filter(n => n > maxValue || n < minValue)}, max: $maxValue min: $minValue"
               )
             )
           case numbers =>
@@ -112,9 +105,7 @@ object Sqids {
               .fromNumbers(numbers, _alphabet, false)
               .handleMinLength(options.minLength)
               .handleBlocked(options.blocklist, maxValue)
-
         }
-
     }
   }
 }

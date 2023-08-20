@@ -7,9 +7,13 @@ sealed trait SqidsError extends RuntimeException with NoStackTrace
 object SqidsError {
   final case class OutOfRange(override val getMessage: String) extends SqidsError
 
-  final case class AlphabetTooSmall(override val getMessage: String) extends SqidsError
+  final case object AlphabetTooSmall extends SqidsError {
+    override def getMessage(): String = "Alphabet must contain more than 5 characters"
+  }
 
-  final case class AlphabetNotUnique(override val getMessage: String) extends SqidsError
+  final case object AlphabetNotUnique extends SqidsError {
+    override def getMessage(): String = "Alphabet must contain unique characters"
+  }
 
   final case class EncodeError(override val getMessage: String) extends SqidsError
 }
