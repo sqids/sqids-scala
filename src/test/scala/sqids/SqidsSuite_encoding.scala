@@ -7,8 +7,8 @@ import org.scalacheck.Gen
 final class SqidsSuite_encoding extends ScalaCheckSuite {
   val sqids = Sqids.default
   test("simple") {
-    val numbers = List(1, 2, 3);
-    val id = "8QRLaD";
+    val numbers = List(1, 2, 3)
+    val id = "8QRLaD"
     assertEquals(sqids.encodeUnsafeString(numbers: _*), id)
   }
 

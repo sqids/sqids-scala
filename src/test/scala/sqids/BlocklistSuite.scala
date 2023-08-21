@@ -48,7 +48,7 @@ final class BlocklistSuite extends ScalaCheckSuite {
       incrementalBlockList
     )
     assertEquals(sqids.encodeUnsafeString(1, 2, 3), "TM0x1Mxz")
-    assertEquals(sqids.decode("TM0x1Mxz"), List(1, 2, 3));
+    assertEquals(sqids.decode("TM0x1Mxz"), List(1, 2, 3))
   }
 
   test("decoding blocklist words should still work") {

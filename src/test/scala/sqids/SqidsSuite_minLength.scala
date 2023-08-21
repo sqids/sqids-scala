@@ -8,7 +8,7 @@ final class SqidsSuite_minLength extends ScalaCheckSuite {
   val sqids = SqidsOptions.default.withMinLength(SqidsOptions.default.alphabet.length).map(Sqids.apply)
   sqids.foreach { sqids =>
     test("simple") {
-      val numbers = List(1, 2, 3);
+      val numbers = List(1, 2, 3)
       val id = "75JILToVsGerOADWmHlY38xvbaNZKQ9wdFS0B6kcMEtnRpgizhjU42qT1cd0dL"
       assertEquals(sqids.encodeUnsafeString(numbers: _*), id)
       assertEquals(sqids.decode(id), numbers)
