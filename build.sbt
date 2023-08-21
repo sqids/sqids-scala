@@ -20,6 +20,7 @@ lazy val sqids = project
   .in(file("."))
   .settings(
     name := "sqids",
+    headerLicenseStyle := HeaderLicenseStyle.SpdxSyntax,
     libraryDependencies ++= Seq(
       "org.scalameta" %% "munit-scalacheck" % "0.7.29" % Test
     )
