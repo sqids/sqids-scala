@@ -19,7 +19,6 @@ ThisBuild / mimaFailOnNoPrevious := false
 
 lazy val sqids = project
   .in(file("."))
-  .disablePlugins(MimaPlugin)
   .settings(
     name := "sqids",
     headerLicenseStyle := HeaderLicenseStyle.SpdxSyntax,
