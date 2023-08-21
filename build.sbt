@@ -12,6 +12,7 @@ ThisBuild / developers ++= List(
 ThisBuild / tlBaseVersion := "0.1"
 ThisBuild / crossScalaVersions := supportedScalaVersions
 ThisBuild / scalaVersion := scala213
+ThisBuild / tlSonatypeUseLegacyHost := false
 
 // Remove when first release is done
 ThisBuild / mimaFailOnNoPrevious := false
