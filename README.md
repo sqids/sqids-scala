@@ -1,6 +1,8 @@
 # [Sqids Scala](https://sqids.org/scala)
 
-![Tests](https://github.com/sqids/sqids-scala/actions/workflows/ci.yml/badge.svg) ![Release](https://img.shields.io/github/v/release/sqids/sqids-scala)
+[![Release](https://index.scala-lang.org/sqids/sqids-scala/latest.svg?color=orange)](https://index.scala-lang.org/sqids/sqids-scala)
+[![Tests](https://github.com/sqids/sqids-scala/actions/workflows/ci.yml/badge.svg)](https://github.com/sqids/sqids-scala/actions/workflows/ci.yml) 
+[![License](https://img.shields.io/badge/license-MIT-blue)](https://github.com/sqids/sqids-scala/blob/main/LICENSE)
 
 [Sqids](https://sqids.org/scala) (*pronounced "squids"*) is a small library that lets you **generate unique IDs from numbers**. It's good for link shortening, fast & URL-safe ID generation and decoding back into numbers for quicker database lookups.
 
