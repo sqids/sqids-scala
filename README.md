@@ -93,7 +93,7 @@ import sqids.Sqids
 
 val sqids = Sqids.withBlocklist(Blocklist(Set("8QRLaD", "7T1cd0dL")))
 val id = sqids.encodeUnsafeString(1, 2, 3) 
-// "8QRLaD"
+// id: String = "RA8UeIe7"
 
 sqids.decode(id)
 // List(1, 2, 3)
