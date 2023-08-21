@@ -32,7 +32,7 @@ Not good for:
 Include in build.sbt:
 
 ```scala
-libraryDependencies ++= "sqids" %% "sqids-scala" % "<version TBA>"
+libraryDependencies ++= "org.sqids" %% "sqids" % "0.1.0"
 ```
 
 ## 👩‍💻 Examples
