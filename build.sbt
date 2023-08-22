@@ -9,7 +9,7 @@ ThisBuild / licenses := Seq(License.MIT)
 ThisBuild / developers ++= List(
   tlGitHubDev("jesperoman", "Jesper Öman")
 )
-ThisBuild / tlBaseVersion := "0.2"
+ThisBuild / tlBaseVersion := "0.3"
 ThisBuild / crossScalaVersions := supportedScalaVersions
 ThisBuild / scalaVersion := scala213
 ThisBuild / tlSonatypeUseLegacyHost := false
