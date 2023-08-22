@@ -121,12 +121,12 @@ final class SqidsSuite_encoding extends ScalaCheckSuite {
   }
 
   property("arbitrary numbers") {
-    forAll(Gen.choose(0, Long.MaxValue)) { (n: Long) =>
+    forAll(Gen.choose(0L, Long.MaxValue)) { (n: Long) =>
       assertEquals(sqids.decode(sqids.encodeUnsafeString(n)), List(n))
     }
   }
   property("arbitrary number lists") {
-    forAll(Gen.listOf(Gen.choose(0, Long.MaxValue))) { (n: List[Long]) =>
+    forAll(Gen.listOf(Gen.choose(0L, Long.MaxValue))) { (n: List[Long]) =>
       assertEquals(sqids.decode(sqids.encodeUnsafeString(n: _*)), n)
     }
   }
