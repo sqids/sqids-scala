@@ -27,37 +27,38 @@ sealed abstract case class Alphabet(value: String) {
   def validId(id: String): Boolean =
     id.forall(c => value.contains(c))
 
-  def toId(num: Int): String = {
+  def toId(num: Long): String = {
     @tailrec
-    def go(num: Int, acc: List[Char]): String =
+    def go(num: Long, acc: List[Char]): String =
       if (num <= 0) acc.mkString
       else
-        go(num / length, value(num % length) :: acc)
+        go(num / length, value((num % length).toInt) :: acc)
 
-    go(num / length, List(value(num % length)))
+    go(num / length, List(value((num % length).toInt)))
   }
 
-  def toNumber(id: String): Int =
-    id.foldLeft(0)((acc, c) => acc * length + indexOf(c))
+  def toNumber(id: String): Long =
+    id.foldLeft(0L)((acc, c) => acc * length + indexOf(c).toLong)
 
   def shuffle: Alphabet =
-    new Alphabet(value.indices.take(length - 1).foldLeft(value) { (str, i) =>
-      val j = length - 1 - i
-      val r = (i * j + str(i) + str(j)) % length
+    new Alphabet(value.indices.take((length - 1).toInt).foldLeft(value) { (str, i) =>
+      val j: Int = length - 1 - i
+      val r: Int = (i * j + str(i) + str(j.toInt)) % length
       val iChar = str(i)
       str.updated(i, str(r)).updated(r, iChar)
     }) {}
 
   def offsetFromPrefix(prefix: Char) = value.indexOf(prefix.toInt)
-  def getOffset(numbers: List[Int]): Int =
+
+  def getOffset(numbers: List[Long]): Int =
     numbers.indices.foldLeft(numbers.length) { (offset, i) =>
-      offset + i + value(numbers(i) % length)
+      offset + i + value((numbers(i) % length.toLong).toInt)
     } % length
 
   def rearrange(offset: Int): Alphabet =
     new Alphabet(value.drop(offset) + value.take(offset)) {}
 
-  def rearrange(numbers: List[Int]): Alphabet =
+  def rearrange(numbers: List[Long]): Alphabet =
     rearrange(getOffset(numbers))
 }
 
