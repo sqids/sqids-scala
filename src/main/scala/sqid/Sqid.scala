@@ -37,9 +37,6 @@ final case class Sqid(
     if (blocklist.isBlocked(value)) {
       val newNumbers: Either[SqidsError, List[Long]] =
         if (partitioned)
-          // Here we have a true cornercase, we have to find
-          // 2 147 483 647 sequential iterations of a blocked id
-          // before this happens 😅
           if (numbers.head + 1L > maxValue)
             Left(SqidsError.OutOfRange("Ran out of range checking against the blocklist"))
           else
