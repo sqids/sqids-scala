@@ -1,3 +1,9 @@
+/*
+ * Copyright 2023 Sqids
+ *
+ * SPDX-License-Identifier: MIT
+ */
+
 package sqids.options
 
 sealed abstract case class Blocklist(value: Set[String]) {

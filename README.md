@@ -1,6 +1,8 @@
 # [Sqids Scala](https://sqids.org/scala)
 
-![Tests](https://github.com/sqids/sqids-scala/actions/workflows/ci.yml/badge.svg)
+[![Release](https://index.scala-lang.org/sqids/sqids-scala/latest.svg?color=orange)](https://index.scala-lang.org/sqids/sqids-scala)
+[![Tests](https://github.com/sqids/sqids-scala/actions/workflows/ci.yml/badge.svg)](https://github.com/sqids/sqids-scala/actions/workflows/ci.yml) 
+[![License](https://img.shields.io/badge/license-MIT-blue)](https://github.com/sqids/sqids-scala/blob/main/LICENSE)
 
 [Sqids](https://sqids.org/scala) (*pronounced "squids"*) is a small library that lets you **generate unique IDs from numbers**. It's good for link shortening, fast & URL-safe ID generation and decoding back into numbers for quicker database lookups.
 
@@ -32,7 +34,7 @@ Not good for:
 Include in build.sbt:
 
 ```scala
-libraryDependencies ++= "sqids" %% "sqids-scala" % "<version TBA>"
+libraryDependencies ++= "org.sqids" %% "sqids" % "0.1.0"
 ```
 
 ## 👩‍💻 Examples
@@ -93,7 +95,7 @@ import sqids.Sqids
 
 val sqids = Sqids.withBlocklist(Blocklist(Set("8QRLaD", "7T1cd0dL")))
 val id = sqids.encodeUnsafeString(1, 2, 3) 
-// "8QRLaD"
+// id: String = "RA8UeIe7"
 
 sqids.decode(id)
 // List(1, 2, 3)
