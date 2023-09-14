@@ -16,7 +16,7 @@ sealed abstract case class Blocklist(value: Set[String]) {
   }
 
   def filter(alphabet: Alphabet): Blocklist =
-    Blocklist.apply(value.filter(_.forall(alphabet.value.contains(_))))
+    Blocklist.apply(value.filter(_.forall(alphabet.value.map(_.toLower).contains(_))))
 }
 
 object Blocklist {

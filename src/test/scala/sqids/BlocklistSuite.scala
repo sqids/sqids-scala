@@ -7,6 +7,8 @@
 package sqids
 import munit.ScalaCheckSuite
 import sqids.options.Blocklist
+import sqids.options.SqidsOptions
+import sqids.options.Alphabet
 
 final class BlocklistSuite extends ScalaCheckSuite {
   val sqids = Sqids.default
@@ -75,5 +77,20 @@ final class BlocklistSuite extends ScalaCheckSuite {
   test("match against a short blocklist word") {
     val sqids = Sqids.withBlocklist(Blocklist(Set("pPQ")))
     assertEquals(sqids.decode(sqids.encodeUnsafeString(1, 2, 3)), List(1L, 2L, 3L))
+  }
+  test("blocklist filtering in constructor") {
+    for {
+      alpha <- Alphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+      blocklist = Blocklist(Set("sqnmpn"))
+      withAlphabet <- SqidsOptions.default.withAlphabet(alpha)
+      options = withAlphabet.withBlocklist(blocklist)
+      sqids = Sqids(options)
+      id <- sqids.encode(1, 2, 3)
+      numbers = sqids.decode(id.value)
+    } yield {
+      assertEquals(id.value, "ULPBZGBM")
+      assertEquals(numbers, List(1L, 2L, 3L))
+    }
+
   }
 }
