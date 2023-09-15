@@ -18,7 +18,7 @@ sealed abstract case class Alphabet(value: String) {
   def separator: Char = value.head
   def splitAtSeparator(id: String): Either[String, (String, String)] =
     (id.takeWhile(_ != separator), id.dropWhile(_ != separator).tail) match {
-      case (first, _) if first.exists(!removeSeparator.value.contains(_)) || first.isEmpty =>
+      case (first, _) if first.exists(!removeSeparator.value.contains(_)) =>
         Left("First part have invalid characters")
       case res => Right(res)
     }
@@ -49,16 +49,16 @@ sealed abstract case class Alphabet(value: String) {
 
   def offsetFromPrefix(prefix: Char) = value.indexOf(prefix.toInt)
 
-  def getOffset(numbers: List[Long]): Int =
-    numbers.indices.foldLeft(numbers.length) { (offset, i) =>
+  def getOffset(numbers: List[Long], increment: Int): Int =
+    (numbers.indices.foldLeft(numbers.length) { (offset, i) =>
       offset + i + value((numbers(i) % length.toLong).toInt)
-    } % length
+    } % length) + increment
 
   def rearrange(offset: Int): Alphabet =
     new Alphabet(value.drop(offset) + value.take(offset)) {}
 
-  def rearrange(numbers: List[Long]): Alphabet =
-    rearrange(getOffset(numbers))
+  def rearrange(numbers: List[Long], increment: Int): Alphabet =
+    rearrange(getOffset(numbers, increment))
 
   def reverse: Alphabet = new Alphabet(value.reverse) {}
 }
@@ -68,8 +68,10 @@ object Alphabet {
     value match {
       case v if v.distinct.length != v.length =>
         Left(SqidsError.AlphabetNotUnique)
-      case v if v.length < 5 =>
+      case v if v.length < 3 =>
         Left(SqidsError.AlphabetTooSmall)
+      case v if v.getBytes.length != v.length =>
+        Left(SqidsError.AlphabetMultibyteChars)
       case v =>
         Right(new Alphabet(v) {})
     }

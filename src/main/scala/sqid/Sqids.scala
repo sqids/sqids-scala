@@ -69,7 +69,7 @@ object Sqids {
         }
 
       private def getNumbers(prefix: Char, id: String): List[Long] = {
-        if (id == "ff") println(s"$prefix :: $id")
+
         @tailrec
         def go(
           id: String,
@@ -77,22 +77,17 @@ object Sqids {
           acc: Vector[Long]
         ): List[Long] =
           if (id.isEmpty) acc.toList
-          else {
-            val splitted = alphabet.splitAtSeparator(id)
-            if (id == "ff") println(s"splitted: $splitted")
-            if (id == "ff") println(s"separator: ${alphabet.separator}")
+          else
             alphabet.splitAtSeparator(id) match {
               case Left(_) => Nil
+              case Right(("", _)) => acc.toList
               case Right((first, rest)) =>
                 go(rest, alphabet.shuffle, acc :+ alphabet.removeSeparator.toNumber(first))
             }
-          }
 
         val offset = _alphabet.offsetFromPrefix(prefix)
-        if (id == "ff") println(s"alpha: ${_alphabet}")
-        if (id == "ff") println(s"offset: $offset")
+
         val alphabet = _alphabet.rearrange(offset).reverse
-        if (id == "ff") println(s"rearranged: $alphabet")
 
         go(id, alphabet, Vector.empty)
       }
@@ -108,12 +103,11 @@ object Sqids {
               )
             )
           case numbers =>
-            Right(
-              Sqid
-                .fromNumbers(numbers, _alphabet)
-            )
-          // .handleMinLength(options.minLength)
-          // .handleBlocked(options.blocklist, maxValue)
+            Sqid
+              .fromNumbers(numbers, _alphabet)
+              .handleMinLength(options.minLength)
+              .handleBlocked(options.blocklist)
+
         }
     }
   }

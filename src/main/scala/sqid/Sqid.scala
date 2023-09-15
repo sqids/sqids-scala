@@ -26,48 +26,36 @@ final case class Sqid(
   def append(s: String) = copy(value = value + s)
   def length = value.length
   def fillToMinLength(minLength: Int): Sqid =
-    copy(value =
-      value.head.toString +
-        alphabet.value.take(minLength - length) +
-        value.drop(1).take(length)
-    )
+    if (value.length < minLength) {
+      val shuffled = alphabet.shuffle
+      copy(
+        value = value + shuffled.value.take(math.min(minLength - length, alphabet.length)),
+        alphabet = shuffled
+      ).fillToMinLength(minLength)
+    } else this
+
   def shuffle = copy(alphabet = alphabet.shuffle)
 
-  def handleBlocked(blocklist: Blocklist, maxValue: Long): Either[SqidsError, Sqid] = ???
-  //   if (blocklist.isBlocked(value)) {
-  //     val newNumbers: Either[SqidsError, List[Long]] =
-  //       if (partitioned)
-  //         if (numbers.head + 1L > maxValue)
-  //           Left(SqidsError.OutOfRange("Ran out of range checking against the blocklist"))
-  //         else
-  //           Right(numbers.head + 1L :: numbers.tail)
-  //       else
-  //         Right(0L :: numbers)
+  def handleBlocked(blocklist: Blocklist): Either[SqidsError, Sqid] =
+    if (blocklist.isBlocked(value))
+      Sqid
+        .fromNumbers(numbers, originalAlphabet, increment + 1)
+        .handleBlocked(blocklist)
+    else Right(this)
 
-  //     newNumbers.flatMap(numbers =>
-  //       Sqid
-  //         .fromNumbers(numbers, originalAlphabet, true)
-  //         .handleBlocked(blocklist, maxValue)
-  //     )
-  //   } else Right(this)
-
-  def handleMinLength(minLength: Int): Sqid = ???
-  //   if (length < minLength)
-  //     if (!partitioned)
-  //       Sqid
-  //         .fromNumbers(0 :: numbers, originalAlphabet, true)
-  //         .handleMinLength(minLength)
-  //     else
-  //       fillToMinLength(minLength)
-  //   else this
+  def handleMinLength(minLength: Int): Sqid =
+    if (minLength > length)
+      copy(value + alphabet.separator).fillToMinLength(minLength)
+    else this
 }
 
 object Sqid {
   def fromNumbers(
     numbers: List[Long],
-    a: Alphabet
+    a: Alphabet,
+    increment: Int = 0
   ): Sqid = {
-    val alphabet = a.rearrange(numbers)
+    val alphabet = a.rearrange(numbers, increment)
 
     @tailrec
     def go(
@@ -93,7 +81,7 @@ object Sqid {
         value = alphabet.prefix.toString,
         alphabet = alphabet.reverse,
         numbers = numbers,
-        increment = 0,
+        increment = increment,
         originalAlphabet = a
       )
     )
