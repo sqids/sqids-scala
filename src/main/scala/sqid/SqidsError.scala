@@ -26,7 +26,7 @@ object SqidsError {
 
   final case class EncodeError(override val getMessage: String) extends SqidsError
 
-  final case object RegenerationMaxAttempts extends SqidsError {
+  case object RegenerationMaxAttempts extends SqidsError {
     override def getMessage(): String = "Reached max attempts to re-generate the ID"
   }
 }
