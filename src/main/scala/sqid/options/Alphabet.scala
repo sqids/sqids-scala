@@ -14,12 +14,11 @@ sealed abstract case class Alphabet(value: String) {
   def indexOf(c: Char) = value.indexOf(c.toInt)
   def prefix = value.head
   def partition = value(1)
-  def removePrefixAndPartition: Alphabet = new Alphabet(value.drop(2)) {}
-  def removeSeparator: Alphabet = new Alphabet(value.take(value.length - 1)) {}
-  def separator: Char = value.last
+  def removeSeparator: Alphabet = new Alphabet(value.tail) {}
+  def separator: Char = value.head
   def splitAtSeparator(id: String): Either[String, (String, String)] =
     (id.takeWhile(_ != separator), id.dropWhile(_ != separator).tail) match {
-      case (first, _) if first.exists(!removeSeparator.value.contains(_)) =>
+      case (first, _) if first.exists(!removeSeparator.value.contains(_)) || first.isEmpty =>
         Left("First part have invalid characters")
       case res => Right(res)
     }
@@ -60,6 +59,8 @@ sealed abstract case class Alphabet(value: String) {
 
   def rearrange(numbers: List[Long]): Alphabet =
     rearrange(getOffset(numbers))
+
+  def reverse: Alphabet = new Alphabet(value.reverse) {}
 }
 
 object Alphabet {

@@ -69,6 +69,7 @@ object Sqids {
         }
 
       private def getNumbers(prefix: Char, id: String): List[Long] = {
+        if (id == "ff") println(s"$prefix :: $id")
         @tailrec
         def go(
           id: String,
@@ -76,24 +77,24 @@ object Sqids {
           acc: Vector[Long]
         ): List[Long] =
           if (id.isEmpty) acc.toList
-          else
+          else {
+            val splitted = alphabet.splitAtSeparator(id)
+            if (id == "ff") println(s"splitted: $splitted")
+            if (id == "ff") println(s"separator: ${alphabet.separator}")
             alphabet.splitAtSeparator(id) match {
               case Left(_) => Nil
               case Right((first, rest)) =>
                 go(rest, alphabet.shuffle, acc :+ alphabet.removeSeparator.toNumber(first))
             }
+          }
 
-        val (alphabet, partitionIndex) = {
-          val offset = _alphabet.offsetFromPrefix(prefix)
-          val rearranged = _alphabet.rearrange(offset)
-          val partition = rearranged.partition
-          (rearranged.removePrefixAndPartition, id.indexOf(partition.toInt))
-        }
+        val offset = _alphabet.offsetFromPrefix(prefix)
+        if (id == "ff") println(s"alpha: ${_alphabet}")
+        if (id == "ff") println(s"offset: $offset")
+        val alphabet = _alphabet.rearrange(offset).reverse
+        if (id == "ff") println(s"rearranged: $alphabet")
 
-        if (partitionIndex > 0 && partitionIndex < id.length - 1)
-          go(id.drop(partitionIndex + 1), alphabet.shuffle, Vector.empty)
-        else
-          go(id, alphabet, Vector.empty)
+        go(id, alphabet, Vector.empty)
       }
 
       private def encode_(
@@ -107,10 +108,12 @@ object Sqids {
               )
             )
           case numbers =>
-            Sqid
-              .fromNumbers(numbers, _alphabet, false)
-              .handleMinLength(options.minLength)
-              .handleBlocked(options.blocklist, maxValue)
+            Right(
+              Sqid
+                .fromNumbers(numbers, _alphabet)
+            )
+          // .handleMinLength(options.minLength)
+          // .handleBlocked(options.blocklist, maxValue)
         }
     }
   }
