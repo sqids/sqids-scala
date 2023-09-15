@@ -86,6 +86,16 @@ final class BlocklistSuite extends ScalaCheckSuite {
       assertEquals(id.value, "IBSHOZ")
       assertEquals(numbers, List(1L, 2L, 3L))
     }
+  }
 
+  test("max encoding attempts") {
+    for {
+      alphabet <- Alphabet("abc")
+      minLength = 3
+      blocklist = Blocklist(Set("cab", "abc", "bca"))
+      options <- SqidsOptions(alphabet, minLength, blocklist)
+      sqids = Sqids(options)
+      result = sqids.encode(0)
+    } yield assertEquals(result, Left(SqidsError.RegenerationMaxAttempts))
   }
 }

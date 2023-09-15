@@ -36,11 +36,14 @@ final case class Sqid(
 
   def shuffle = copy(alphabet = alphabet.shuffle)
 
-  def handleBlocked(blocklist: Blocklist): Either[SqidsError, Sqid] =
-    if (blocklist.isBlocked(value))
+  def handleBlocked(blocklist: Blocklist, minLength: Int): Either[SqidsError, Sqid] =
+    if (blocklist.isBlocked(value) && increment <= alphabet.length)
       Sqid
         .fromNumbers(numbers, originalAlphabet, increment + 1)
-        .handleBlocked(blocklist)
+        .handleMinLength(minLength)
+        .handleBlocked(blocklist, minLength)
+    else if (blocklist.isBlocked(value))
+      Left(SqidsError.RegenerationMaxAttempts)
     else Right(this)
 
   def handleMinLength(minLength: Int): Sqid =

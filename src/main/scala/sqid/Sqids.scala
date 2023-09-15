@@ -69,7 +69,6 @@ object Sqids {
         }
 
       private def getNumbers(prefix: Char, id: String): List[Long] = {
-
         @tailrec
         def go(
           id: String,
@@ -106,7 +105,7 @@ object Sqids {
             Sqid
               .fromNumbers(numbers, _alphabet)
               .handleMinLength(options.minLength)
-              .handleBlocked(options.blocklist)
+              .handleBlocked(options.blocklist, options.minLength)
 
         }
     }
