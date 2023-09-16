@@ -9,13 +9,12 @@ package sqids.options
 import scala.annotation.tailrec
 import sqids.SqidsError
 
-sealed abstract case class Alphabet(value: String) {
+sealed abstract case class Alphabet(value: Vector[Char]) {
   def length = value.length
   def indexOf(c: Char) = value.indexOf(c.toInt)
   def prefix = value.head
-  def partition = value(1)
-  def removeSeparator: Alphabet = new Alphabet(value.tail) {}
   def separator: Char = value.head
+  def removeSeparator: Alphabet = new Alphabet(value.tail) {}
   def splitAtSeparator(id: String): Either[String, (String, String)] =
     (id.takeWhile(_ != separator), id.dropWhile(_ != separator).tail) match {
       case (first, _) if first.exists(!removeSeparator.value.contains(_)) =>
@@ -35,17 +34,25 @@ sealed abstract case class Alphabet(value: String) {
 
     go(num / length, List(value((num % length).toInt)))
   }
+  def fillToMinLength(id: String, minLength: Int): String =
+    id + value.take(math.min(minLength - id.length, length)).mkString
 
   def toNumber(id: String): Long =
     id.foldLeft(0L)((acc, c) => acc * length + indexOf(c).toLong)
 
   def shuffle: Alphabet =
-    new Alphabet(value.indices.take((length - 1).toInt).foldLeft(value) { (str, i) =>
-      val j: Int = length - 1 - i
-      val r: Int = (i * j + str(i) + str(j.toInt)) % length
-      val iChar = str(i)
-      str.updated(i, str(r)).updated(r, iChar)
-    }) {}
+    new Alphabet(
+      value.indices
+        .take((length - 1).toInt)
+        .foldLeft(value) { (vec, i) =>
+          val j: Int = length - 1 - i
+          val r: Int = (i * j + vec(i) + vec(j.toInt)) % length
+          val iChar = vec(i)
+          vec
+            .updated(i, vec(r))
+            .updated(r, iChar)
+        }
+    ) {}
 
   def offsetFromPrefix(prefix: Char) = value.indexOf(prefix.toInt)
 
@@ -55,7 +62,7 @@ sealed abstract case class Alphabet(value: String) {
     } % length) + increment
 
   def rearrange(offset: Int): Alphabet =
-    new Alphabet(value.drop(offset) + value.take(offset)) {}
+    new Alphabet(value.drop(offset) ++ value.take(offset)) {}
 
   def rearrange(numbers: List[Long], increment: Int): Alphabet =
     rearrange(getOffset(numbers, increment))
@@ -73,9 +80,9 @@ object Alphabet {
       case v if v.getBytes.length != v.length =>
         Left(SqidsError.AlphabetMultibyteChars)
       case v =>
-        Right(new Alphabet(v) {})
+        Right(new Alphabet(v.toVector) {})
     }
 
   def default: Alphabet =
-    new Alphabet((('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9')).mkString) {}
+    new Alphabet((('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9')).toVector) {}
 }

@@ -64,7 +64,7 @@ object Sqid {
       if (value.length < minLength) {
         val shuffled = alphabet.shuffle
         copy(
-          value = value + shuffled.value.take(math.min(minLength - length, alphabet.length)),
+          value = shuffled.fillToMinLength(value, minLength),
           alphabet = shuffled
         ).fillToMinLength(minLength)
       } else this
