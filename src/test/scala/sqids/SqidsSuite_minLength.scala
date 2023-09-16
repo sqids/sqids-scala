@@ -8,6 +8,7 @@ package sqids
 
 import munit.ScalaCheckSuite
 import sqids.options.SqidsOptions
+import sqids.options.Alphabet
 
 final class SqidsSuite_minLength extends ScalaCheckSuite {
 
@@ -19,7 +20,32 @@ final class SqidsSuite_minLength extends ScalaCheckSuite {
       assertEquals(sqids.encodeUnsafeString(numbers: _*), id)
       assertEquals(sqids.decode(id), numbers)
     }
+    test("incremental") {
+      val numbers: List[Long] = List(1, 2, 3);
+      val alphabetLength = Alphabet.default.length
+      val map: Map[Int, String] = Map(
+        6 -> "86Rf07",
+        7 -> "86Rf07x",
+        8 -> "86Rf07xd",
+        9 -> "86Rf07xd4",
+        10 -> "86Rf07xd4z",
+        11 -> "86Rf07xd4zB",
+        12 -> "86Rf07xd4zBm",
+        13 -> "86Rf07xd4zBmi",
+        alphabetLength + 0 -> "86Rf07xd4zBmiJXQG6otHEbew02c3PWsUOLZxADhCpKj7aVFv9I8RquYrNlSTM",
+        alphabetLength + 1 -> "86Rf07xd4zBmiJXQG6otHEbew02c3PWsUOLZxADhCpKj7aVFv9I8RquYrNlSTMy",
+        alphabetLength + 2 -> "86Rf07xd4zBmiJXQG6otHEbew02c3PWsUOLZxADhCpKj7aVFv9I8RquYrNlSTMyf",
+        alphabetLength + 3 -> "86Rf07xd4zBmiJXQG6otHEbew02c3PWsUOLZxADhCpKj7aVFv9I8RquYrNlSTMyf1"
+      )
 
+      map.foreach { case (minLength, id) =>
+        val sqids = Sqids.withMinLength(minLength).toOption.get
+        assertEquals(sqids.encodeUnsafeString(numbers: _*), id)
+        assertEquals(sqids.encodeUnsafeString(numbers: _*).length, minLength)
+        assertEquals(sqids.decode(id), numbers)
+      }
+
+    }
     test("incremental numbers") {
       val ids = Map(
         "SvIzsqYMyQwI3GWgJAe17URxX8V924Co0DaTZLtFjHriEn5bPhcSkfmvOslpBu" -> List(0, 0),
@@ -64,7 +90,7 @@ final class SqidsSuite_minLength extends ScalaCheckSuite {
     test("out-of-range invalid min length") {
       assert(SqidsOptions.default.withMinLength(minLength = -1).isLeft)
       assert(
-        SqidsOptions.default.withMinLength(minLength = SqidsOptions.default.alphabet.value.length + 1).isLeft
+        SqidsOptions.default.withMinLength(minLength = SqidsOptions.MinLengthLimit + 1).isLeft
       )
     }
   }
