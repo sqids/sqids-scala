@@ -20,7 +20,7 @@ final class SqidsSuite_encoding extends ScalaCheckSuite {
 
   test("different inputs") {
     val numbers =
-      List(0, 0, 0, 1, 2, 3, 100, 1000, 100000, 1000000, sqids.maxValue)
+      List(0, 0, 0, 1, 2, 3, 100, 1000, 100000, 1000000, Long.MaxValue)
 
     assertEquals(sqids.decode(sqids.encodeUnsafeString(numbers: _*)), numbers)
   }
@@ -104,15 +104,15 @@ final class SqidsSuite_encoding extends ScalaCheckSuite {
 
   test("encode out-of-range numbers") {
     assertEquals(
-      sqids.encode(List(sqids.minValue - 1)),
-      Left(SqidsError.OutOfRange("some nr is out of range: List(-1), max: 9223372036854775807 min: 0"))
+      sqids.encode(List(-1L)),
+      Left(SqidsError.OutOfRange("some nr is out of range: -1, max: 9223372036854775807 min: 0"))
     )
 
     assertEquals(
-      sqids.encode(List(sqids.maxValue + 1)),
+      sqids.encode(List(Long.MaxValue + 1)),
       Left(
         SqidsError.OutOfRange(
-          "some nr is out of range: List(-9223372036854775808), max: 9223372036854775807 min: 0"
+          "some nr is out of range: -9223372036854775808, max: 9223372036854775807 min: 0"
         )
       )
     )

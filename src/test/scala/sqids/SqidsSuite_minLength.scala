@@ -44,13 +44,13 @@ final class SqidsSuite_minLength extends ScalaCheckSuite {
     test("min lengths") {
       List(0, 1, 5, 10, SqidsOptions.default.alphabet.value.length).foreach(minLength =>
         List(
-          List(sqids.minValue),
+          List(0L),
           List(0L, 0L, 0L, 0L, 0L),
           List(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L),
           List(100L, 200L, 300L),
           List(1000L, 2000L, 3000L),
           List(1000000L),
-          List(sqids.maxValue)
+          List(Long.MaxValue)
         ).foreach { numbers =>
           SqidsOptions.default.withMinLength(minLength).map(Sqids.apply).foreach { sqids =>
             val id = sqids.encodeUnsafeString(numbers: _*)
