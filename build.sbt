@@ -14,9 +14,6 @@ ThisBuild / crossScalaVersions := supportedScalaVersions
 ThisBuild / scalaVersion := scala213
 ThisBuild / tlSonatypeUseLegacyHost := false
 
-// Remove when first release is done
-ThisBuild / mimaFailOnNoPrevious := false
-
 lazy val sqids = project
   .in(file("."))
   .settings(
@@ -26,17 +23,3 @@ lazy val sqids = project
       "org.scalameta" %% "munit-scalacheck" % "0.7.29" % Test
     )
   )
-
-def addCommandsAlias(name: String, values: List[String]) =
-  addCommandAlias(name, values.mkString(";", ";", ""))
-
-addCommandsAlias(
-  "validate",
-  List(
-    "+clean",
-    "+test",
-    "+mimaReportBinaryIssues",
-    "scalafmtCheckAll",
-    "scalafmtSbtCheck"
-  )
-)

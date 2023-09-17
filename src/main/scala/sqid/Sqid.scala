@@ -51,14 +51,8 @@ object Sqid {
     def addSeparator =
       append(alphabet.separator.toString)
 
-    def addPartitionOrSeparator(partition: String, shouldAddPartition: Boolean) =
-      if (shouldAddPartition) append(partition)
-      else addSeparator
-
     def append(s: String) =
       copy(value = value + s)
-
-    def length = value.length
 
     def fillToMinLength(minLength: Int): SqidEncodeState =
       if (value.length < minLength) {
@@ -83,7 +77,7 @@ object Sqid {
       else Right(this)
 
     def handleMinLength(minLength: Int): SqidEncodeState =
-      if (minLength > length)
+      if (minLength > value.length)
         copy(value + alphabet.separator).fillToMinLength(minLength)
       else this
 
