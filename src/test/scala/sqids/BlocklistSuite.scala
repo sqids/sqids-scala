@@ -12,60 +12,54 @@ import sqids.options.Alphabet
 
 final class BlocklistSuite extends ScalaCheckSuite {
   val sqids = Sqids.default
-  val incrementalBlockList = Blocklist(
-    Set(
-      "8QRLaD", // normal result of 1st encoding, let's block that word on purpose
-      "7T1cd0dL", // result of 2nd encoding
-      "UeIe", // result of 3rd encoding is `RA8UeIe7`, let's block a substring
-      "imhw", // result of 4th encoding is `WM3Limhw`, let's block the postfix
-      "LfUQ" // result of 4th encoding is `LfUQh4HN`, let's block the prefix
-    )
-  )
-  test("simple") {
-    val numbers = sqids.decode("sexy")
-    val encoded = sqids.encodeUnsafeString(numbers: _*)
-    assertEquals(encoded, "d171vI")
+
+  test("if no custom blocklist param, use the default blocklist") {
+    assertEquals(sqids.decode("aho1e"), List(4572721L))
+    assertEquals(sqids.encodeUnsafeString(4572721L), "JExTR")
   }
 
   test("if an empty blocklist param passed, don't use any blocklist") {
     val sqids = Sqids.withBlocklist(Blocklist.empty)
-    val numbers = sqids.decode("sexy")
-    val encoded = sqids.encodeUnsafeString(numbers: _*)
-    assertEquals(encoded, "sexy")
+    assertEquals(sqids.decode("aho1e"), List(4572721L))
+    assertEquals(sqids.encodeUnsafeString(4572721L), "aho1e")
   }
-  test("if a non-empty blocklist param passed, use only that") {
-    val sqids = Sqids.withBlocklist(Blocklist(Set("AvTg")))
-    assertEquals(sqids.decode("sexy"), List(200044L))
-    assertEquals(sqids.encodeUnsafeString(200044), "sexy")
-    assertEquals(sqids.decode("AvTg"), List(100000L))
-    assertEquals(sqids.encodeUnsafeString(100000), "7T1X8k")
-    assertEquals(sqids.decode("7T1X8k"), List(100000L))
 
+  test("if a non-empty blocklist param passed, use only that") {
+    val sqids = Sqids.withBlocklist(Blocklist(Set("ArUO")))
+
+    // make sure we don't use the default blocklist
+    assertEquals(sqids.decode("aho1e"), List(4572721L))
+    assertEquals(sqids.encodeUnsafeString(4572721L), "aho1e")
+
+    // make sure we are using the passed blocklist
+    assertEquals(sqids.decode("ArUO"), List(100000L))
+    assertEquals(sqids.encodeUnsafeString(100000L), "QyG4")
+    assertEquals(sqids.decode("QyG4"), List(100000L))
   }
-  test("only block functionality") {
-    List(
-      "8QRLaD",
-      "7T1cd0dL", // result of 2nd encoding
-      "RA8UeIe7", // result of 3rd encoding is `RA8UeIe7`, let's block a substring
-      "WM3Limhw", // result of 4th encoding is `WM3Limhw`, let's block the postfix
-      "LfUQh4HN"
-    ).foreach(id => assume(incrementalBlockList.isBlocked(id)))
-  }
+
   test("blocklist") {
     val sqids = Sqids.withBlocklist(
-      incrementalBlockList
+      Blocklist(
+        Set(
+          "JSwXFaosAN", // normal result of 1st encoding, let's block that word on purpose
+          "OCjV9JK64o", // result of 2nd encoding
+          "rBHf", // result of 3rd encoding is `4rBHfOiqd3`, let's block a substring
+          "79SM", // result of 4th encoding is `dyhgw479SM`, let's block the postfix
+          "7tE6", // result of 4th encoding is `7tE6jdAHLe`, let's block the prefix
+        )
+      )
     )
-    assertEquals(sqids.encodeUnsafeString(1, 2, 3), "TM0x1Mxz")
-    assertEquals(sqids.decode("TM0x1Mxz"), List(1L, 2L, 3L));
+    assertEquals(sqids.encodeUnsafeString(1_000_000L, 2_000_000L), "1aYeB7bRUt")
+    assertEquals(sqids.decode("1aYeB7bRUt"), List(1_000_000L, 2_000_000L));
   }
 
   test("decoding blocklist words should still work") {
     val blocklist = Set(
-      "8QRLaD",
-      "7T1cd0dL",
-      "RA8UeIe7",
-      "WM3Limhw",
-      "LfUQh4HN"
+      "86Rf07",
+      "se8ojk",
+      "ARsz1p",
+      "Q8AI49",
+      "5sQRZO"
     )
     val sqids = Sqids.withBlocklist(
       Blocklist(
@@ -75,22 +69,33 @@ final class BlocklistSuite extends ScalaCheckSuite {
     blocklist.foreach(id => assertEquals(sqids.decode(id), List(1L, 2L, 3L)))
   }
   test("match against a short blocklist word") {
-    val sqids = Sqids.withBlocklist(Blocklist(Set("pPQ")))
-    assertEquals(sqids.decode(sqids.encodeUnsafeString(1, 2, 3)), List(1L, 2L, 3L))
+    val sqids = Sqids.withBlocklist(Blocklist(Set("pnd")))
+    assertEquals(sqids.decode(sqids.encodeUnsafeString(1_000)), List(1_000L))
   }
+
   test("blocklist filtering in constructor") {
     for {
       alpha <- Alphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-      blocklist = Blocklist(Set("sqnmpn"))
+      blocklist = Blocklist(Set("sxnzkl"))
       withAlphabet <- SqidsOptions.default.withAlphabet(alpha)
       options = withAlphabet.withBlocklist(blocklist)
       sqids = Sqids(options)
       id <- sqids.encode(1, 2, 3)
       numbers = sqids.decode(id.value)
     } yield {
-      assertEquals(id.value, "ULPBZGBM")
+      assertEquals(id.value, "IBSHOZ")
       assertEquals(numbers, List(1L, 2L, 3L))
     }
+  }
 
+  test("max encoding attempts") {
+    for {
+      alphabet <- Alphabet("abc")
+      minLength = 3
+      blocklist = Blocklist(Set("cab", "abc", "bca"))
+      options <- SqidsOptions(alphabet, minLength, blocklist)
+      sqids = Sqids(options)
+      result = sqids.encode(0)
+    } yield assertEquals(result, Left(SqidsError.RegenerationMaxAttempts))
   }
 }

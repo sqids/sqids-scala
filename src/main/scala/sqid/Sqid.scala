@@ -10,72 +10,90 @@ import scala.annotation.tailrec
 import sqids.options.Alphabet
 import sqids.options.Blocklist
 
-final case class Sqid(
-  value: String,
-  alphabet: Alphabet,
-  numbers: List[Long],
-  partitioned: Boolean,
-  originalAlphabet: Alphabet
-) {
-  override def toString = value
-  def withNextnr(nr: Long) = append(alphabet.removeSeparator.toId(nr))
-  def addSeparator = append(alphabet.separator.toString)
-  def addPartitionOrSeparator(partition: String, shouldAddPartition: Boolean) =
-    if (shouldAddPartition) append(partition)
-    else addSeparator
-  def append(s: String) = copy(value = value + s)
-  def length = value.length
-  def fillToMinLength(minLength: Int): Sqid =
-    copy(value =
-      value.head.toString +
-        alphabet.value.take(minLength - length) +
-        value.drop(1).take(length)
-    )
-  def shuffle = copy(alphabet = alphabet.shuffle)
-
-  def handleBlocked(blocklist: Blocklist, maxValue: Long): Either[SqidsError, Sqid] =
-    if (blocklist.isBlocked(value)) {
-      val newNumbers: Either[SqidsError, List[Long]] =
-        if (partitioned)
-          if (numbers.head + 1L > maxValue)
-            Left(SqidsError.OutOfRange("Ran out of range checking against the blocklist"))
-          else
-            Right(numbers.head + 1L :: numbers.tail)
-        else
-          Right(0L :: numbers)
-
-      newNumbers.flatMap(numbers =>
-        Sqid
-          .fromNumbers(numbers, originalAlphabet, true)
-          .handleBlocked(blocklist, maxValue)
-      )
-    } else Right(this)
-
-  def handleMinLength(minLength: Int): Sqid =
-    if (length < minLength)
-      if (!partitioned)
-        Sqid
-          .fromNumbers(0 :: numbers, originalAlphabet, true)
-          .handleMinLength(minLength)
+final case class Sqid(value: String) {
+  def prefix = value.head
+  def toNumbers(_alphabet: Alphabet): List[Long] = {
+    @tailrec
+    def go(
+      id: String,
+      alphabet: Alphabet,
+      acc: Vector[Long]
+    ): List[Long] =
+      if (id.isEmpty) acc.toList
       else
-        fillToMinLength(minLength)
-    else this
+        alphabet.splitAtSeparator(id) match {
+          case Left(_) => Nil
+          case Right(("", _)) => acc.toList
+          case Right((first, rest)) =>
+            go(rest, alphabet.shuffle, acc :+ alphabet.removeSeparator.toNumber(first))
+        }
+
+    val offset = _alphabet.offsetFromPrefix(prefix)
+
+    go(value.tail, _alphabet.rearrange(offset).reverse, Vector.empty)
+  }
 }
 
 object Sqid {
-  def fromNumbers(
+  private final case class SqidEncodeState(
+    value: String,
+    alphabet: Alphabet,
+    numbers: List[Long],
+    increment: Int,
+    originalAlphabet: Alphabet
+  ) {
+    override def toString =
+      value
+
+    def withNextnr(nr: Long) =
+      append(alphabet.removeSeparator.toId(nr))
+
+    def addSeparator =
+      append(alphabet.separator.toString)
+
+    def append(s: String) =
+      copy(value = value + s)
+
+    def fillToMinLength(minLength: Int): SqidEncodeState =
+      if (value.length < minLength) {
+        val shuffled = alphabet.shuffle
+        copy(
+          value = shuffled.fillToMinLength(value, minLength),
+          alphabet = shuffled
+        ).fillToMinLength(minLength)
+      } else this
+
+    def shuffle =
+      copy(alphabet = alphabet.shuffle)
+
+    def handleBlocked(blocklist: Blocklist, minLength: Int): Either[SqidsError, SqidEncodeState] =
+      if (blocklist.isBlocked(value) && increment <= alphabet.length)
+        Sqid
+          .getEncodeState(numbers, originalAlphabet, increment + 1)
+          .handleMinLength(minLength)
+          .handleBlocked(blocklist, minLength)
+      else if (blocklist.isBlocked(value))
+        Left(SqidsError.RegenerationMaxAttempts)
+      else Right(this)
+
+    def handleMinLength(minLength: Int): SqidEncodeState =
+      if (minLength > value.length)
+        copy(value + alphabet.separator).fillToMinLength(minLength)
+      else this
+
+    def toSqid = Sqid(value)
+  }
+
+  private def getEncodeState(
     numbers: List[Long],
     a: Alphabet,
-    partitioned: Boolean
-  ): Sqid = {
-    val alphabet = a.rearrange(numbers)
-
+    increment: Int
+  ): SqidEncodeState = {
     @tailrec
     def go(
       numbers: List[Long],
-      sqid: Sqid,
-      first: Boolean
-    ): Sqid =
+      sqid: SqidEncodeState,
+    ): SqidEncodeState =
       numbers match {
         case Nil => sqid.copy(value = "")
         case List(nr) => sqid.withNextnr(nr)
@@ -84,25 +102,33 @@ object Sqid {
             numbers = next,
             sqid = sqid
               .withNextnr(nr)
-              .addPartitionOrSeparator(
-                alphabet.partition.toString,
-                first && partitioned
-              )
-              .shuffle,
-            first = false
+              .addSeparator
+              .shuffle
           )
       }
 
+    val alphabet = a.rearrange(numbers, increment)
+
     go(
       numbers = numbers,
-      sqid = Sqid(
+      sqid = SqidEncodeState(
         value = alphabet.prefix.toString,
-        alphabet = alphabet.removePrefixAndPartition,
+        alphabet = alphabet.reverse,
         numbers = numbers,
-        partitioned = partitioned,
+        increment = increment,
         originalAlphabet = a
-      ),
-      first = true
+      )
     )
   }
+
+  def fromNumbers(
+    numbers: List[Long],
+    a: Alphabet,
+    minLength: Int,
+    blocklist: Blocklist
+  ): Either[SqidsError, Sqid] =
+    getEncodeState(numbers, a, 0)
+      .handleMinLength(minLength)
+      .handleBlocked(blocklist, minLength)
+      .map(_.toSqid)
 }

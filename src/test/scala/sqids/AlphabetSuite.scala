@@ -12,7 +12,7 @@ import sqids.options.Alphabet
 class AlphabetSuite extends ScalaCheckSuite {
   test("simple") {
     val numbers: List[Long] = List(1, 2, 3)
-    val id = "4d9fd2"
+    val id = "489158"
     Alphabet("0123456789abcdef")
       .flatMap(Sqids.forAlphabet)
       .foreach { sqids =>
@@ -23,7 +23,7 @@ class AlphabetSuite extends ScalaCheckSuite {
 
   test("short alphabet") {
     val numbers: List[Long] = List(1, 2, 3)
-    Alphabet("abcde")
+    Alphabet("abc")
       .flatMap(Sqids.forAlphabet)
       .foreach(sqids => assertEquals(sqids.decode(sqids.encodeUnsafeString(numbers: _*)), numbers))
   }
@@ -37,11 +37,15 @@ class AlphabetSuite extends ScalaCheckSuite {
       .foreach(sqids => assertEquals(sqids.decode(sqids.encodeUnsafeString(numbers: _*)), numbers))
   }
 
+  test("multibyte characters") {
+    assertEquals(Alphabet("ë1092"), Left(SqidsError.AlphabetMultibyteChars))
+  }
+
   test("repeating alphabet characters") {
-    assert(Alphabet("aabcdefg").isLeft)
+    assertEquals(Alphabet("aabcdefg"), Left(SqidsError.AlphabetNotUnique))
   }
 
   test("too short of an alphabet") {
-    assert(Alphabet("abcd").isLeft)
+    assertEquals(Alphabet("ab"), Left(SqidsError.AlphabetTooSmall))
   }
 }

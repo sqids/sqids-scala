@@ -28,14 +28,16 @@ sealed abstract case class SqidsOptions(
     blocklist
   )
 
-  def withMinLength(minLength: Int): Either[InvalidSqidsOptions, SqidsOptions] = SqidsOptions.apply(
-    alphabet,
-    minLength,
-    blocklist
-  )
+  def withMinLength(minLength: Int): Either[InvalidSqidsOptions, SqidsOptions] =
+    SqidsOptions.apply(
+      alphabet,
+      minLength,
+      blocklist
+    )
 }
 
 object SqidsOptions {
+  val MinLengthLimit = 255
   def apply(
     alphabet: Alphabet,
     minLength: Int,
@@ -43,8 +45,8 @@ object SqidsOptions {
   ): Either[InvalidSqidsOptions, SqidsOptions] =
     if (minLength < 0)
       Left(InvalidSqidsOptions("minLength need to be > 0"))
-    else if (minLength > alphabet.length)
-      Left(InvalidSqidsOptions("minLength cant be larger than alphabet length"))
+    else if (minLength > MinLengthLimit)
+      Left(InvalidSqidsOptions(s"minLength cant be larger than $MinLengthLimit"))
     else
       Right(
         new SqidsOptions(

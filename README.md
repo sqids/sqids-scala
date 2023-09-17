@@ -34,7 +34,7 @@ Not good for:
 Include in build.sbt:
 
 ```scala
-libraryDependencies ++= "org.sqids" %% "sqids" % "0.3.0"
+libraryDependencies ++= "org.sqids" %% "sqids" % "0.4.0"
 ```
 
 ## 👩‍💻 Examples
@@ -45,7 +45,7 @@ Simple encode & decode:
 import sqids.Sqids
 val sqids = Sqids.default
 val id = sqids.encodeUnsafeString(1, 2, 3)
-// id: String = "8QRLaD"
+// id: String = "86Rf07"
 val numbers = sqids.decode(id) 
 // numbers: List[Int] = List(1, 2, 3)
 ```
@@ -64,7 +64,7 @@ Alphabet("FxnXM1kBN6cuhsAvjW3Co7l2RePyY8DwaU04Tzt9fHQrqSVKdpimLGIJOgb5ZE")
   .foreach { sqids =>
     val id = sqids.encodeUnsafeString(1, 2, 3)
     println(id) 
-    // B5aMa3
+    // B4aajs
     println(sqids.decode(id)) 
     // List(1, 2, 3)
   }
@@ -80,7 +80,7 @@ Sqids
   .foreach { sqids =>
     val id = sqids.encodeUnsafeString(1, 2, 3)
     println(id) 
-    // 75JT1cd0dL
+    // 86Rf07xd4z
     println(sqids.decode(id)) 
     // List(1, 2, 3)
   }
@@ -93,15 +93,15 @@ Prevent specific words from appearing anywhere in the auto-generated IDs:
 import sqids.options.Blocklist
 import sqids.Sqids
 
-val sqids = Sqids.withBlocklist(Blocklist(Set("8QRLaD", "7T1cd0dL")))
+val sqids = Sqids.withBlocklist(Blocklist(Set("86Rf07", "se8ojk")))
 val id = sqids.encodeUnsafeString(1, 2, 3) 
-// id: String = "RA8UeIe7"
+// id: String = "ARsz1p"
 
 sqids.decode(id)
 // List(1, 2, 3)
-sqids.decode("8QRLaD")
+sqids.decode("86Rf07")
 // List(1, 2, 3)
-sqids.decode("7T1cd0dL")
+sqids.decode("se8ojk")
 // List(1, 2, 3)
 
 ```

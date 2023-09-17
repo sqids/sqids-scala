@@ -6,7 +6,6 @@
 
 package sqids
 
-import scala.annotation.tailrec
 import sqids.options.Alphabet
 import sqids.options.Blocklist
 import sqids.options.InvalidSqidsOptions
@@ -18,8 +17,6 @@ trait Sqids {
   def encode(numbers: Long*): Either[SqidsError, Sqid]
   def encode(numbers: List[Long]): Either[SqidsError, Sqid]
   def decode(id: String): List[Long]
-  def minValue: Long
-  def maxValue: Long
 }
 
 object Sqids {
@@ -57,60 +54,37 @@ object Sqids {
       override def encode(numbers: List[Long]): Either[SqidsError, Sqid] =
         encode_(numbers)
 
-      override def minValue: Long = 0
+      private def minValue: Long = 0
 
-      override def maxValue: Long = Long.MaxValue
+      private def maxValue: Long = Long.MaxValue
 
       override def decode(input: String): List[Long] =
         input match {
           case "" => List.empty
           case id if !_alphabet.validId(id) => List.empty
-          case id => getNumbers(id.head, id.tail)
+          case id => Sqid(id).toNumbers(_alphabet)
         }
-
-      private def getNumbers(prefix: Char, id: String): List[Long] = {
-        @tailrec
-        def go(
-          id: String,
-          alphabet: Alphabet,
-          acc: Vector[Long]
-        ): List[Long] =
-          if (id.isEmpty) acc.toList
-          else
-            alphabet.splitAtSeparator(id) match {
-              case Left(_) => Nil
-              case Right((first, rest)) =>
-                go(rest, alphabet.shuffle, acc :+ alphabet.removeSeparator.toNumber(first))
-            }
-
-        val (alphabet, partitionIndex) = {
-          val offset = _alphabet.offsetFromPrefix(prefix)
-          val rearranged = _alphabet.rearrange(offset)
-          val partition = rearranged.partition
-          (rearranged.removePrefixAndPartition, id.indexOf(partition.toInt))
-        }
-
-        if (partitionIndex > 0 && partitionIndex < id.length - 1)
-          go(id.drop(partitionIndex + 1), alphabet.shuffle, Vector.empty)
-        else
-          go(id, alphabet, Vector.empty)
-      }
 
       private def encode_(
         numbers: List[Long]
       ): Either[SqidsError, Sqid] =
         numbers match {
           case numbers if numbers.exists(i => i > maxValue || i < minValue) =>
+            val outOfRangeNumbers = numbers.filter(n => n > maxValue || n < minValue)
             Left(
               SqidsError.OutOfRange(
-                s"some nr is out of range: ${numbers.filter(n => n > maxValue || n < minValue)}, max: $maxValue min: $minValue"
+                s"some nr is out of range: ${outOfRangeNumbers.mkString(", ")}, max: $maxValue min: $minValue"
               )
             )
           case numbers =>
             Sqid
-              .fromNumbers(numbers, _alphabet, false)
-              .handleMinLength(options.minLength)
-              .handleBlocked(options.blocklist, maxValue)
+              .fromNumbers(
+                numbers,
+                _alphabet,
+                options.minLength,
+                options.blocklist
+              )
+
         }
     }
   }

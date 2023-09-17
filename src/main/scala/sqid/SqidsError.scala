@@ -13,6 +13,9 @@ sealed trait SqidsError extends RuntimeException with NoStackTrace
 object SqidsError {
   final case class OutOfRange(override val getMessage: String) extends SqidsError
 
+  case object AlphabetMultibyteChars extends SqidsError {
+    override def getMessage(): String = "Alphabet cannot contain multibyte characters"
+  }
   case object AlphabetTooSmall extends SqidsError {
     override def getMessage(): String = "Alphabet must contain more than 5 characters"
   }
@@ -22,4 +25,8 @@ object SqidsError {
   }
 
   final case class EncodeError(override val getMessage: String) extends SqidsError
+
+  case object RegenerationMaxAttempts extends SqidsError {
+    override def getMessage(): String = "Reached max attempts to re-generate the ID"
+  }
 }
