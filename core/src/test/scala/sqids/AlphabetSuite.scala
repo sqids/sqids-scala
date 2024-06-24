@@ -7,6 +7,7 @@
 package sqids
 
 import munit.ScalaCheckSuite
+
 import sqids.options.Alphabet
 
 class AlphabetSuite extends ScalaCheckSuite {
