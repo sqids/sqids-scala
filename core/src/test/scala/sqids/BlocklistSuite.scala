@@ -5,7 +5,9 @@
  */
 
 package sqids
+
 import munit.ScalaCheckSuite
+
 import sqids.options.Blocklist
 import sqids.options.SqidsOptions
 import sqids.options.Alphabet

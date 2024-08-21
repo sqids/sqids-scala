@@ -14,12 +14,22 @@ ThisBuild / crossScalaVersions := supportedScalaVersions
 ThisBuild / scalaVersion := scala213
 ThisBuild / tlSonatypeUseLegacyHost := false
 
-lazy val sqids = project
-  .in(file("."))
-  .settings(
-    name := "sqids",
-    headerLicenseStyle := HeaderLicenseStyle.SpdxSyntax,
-    libraryDependencies ++= Seq(
-      "org.scalameta" %% "munit-scalacheck" % "0.7.29" % Test
+lazy val root =
+  project
+    .in(file("."))
+    .settings(
+      publish / skip := true
     )
-  )
+    .aggregate(core.jvm, core.native, core.js)
+
+lazy val core =
+  crossProject(JVMPlatform, NativePlatform, JSPlatform)
+    .crossType(CrossType.Pure)
+    .in(file("core"))
+    .settings(
+      name := "sqids",
+      headerLicenseStyle := HeaderLicenseStyle.SpdxSyntax,
+      libraryDependencies ++= Seq(
+        "org.scalameta" %%% "munit-scalacheck" % "1.0.0" % Test
+      )
+    )
