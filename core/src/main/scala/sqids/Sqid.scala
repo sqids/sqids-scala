@@ -9,6 +9,7 @@ package sqids
 import scala.annotation.tailrec
 import sqids.options.Alphabet
 import sqids.options.Blocklist
+import sqids.Utils.StringOps
 
 final case class Sqid(value: String) {
   def prefix = value.head
@@ -30,7 +31,7 @@ final case class Sqid(value: String) {
 
     val offset = _alphabet.offsetFromPrefix(prefix)
 
-    go(value.tail, _alphabet.rearrange(offset).reverse, Vector.empty)
+    go(value.tailOrEmpty, _alphabet.rearrange(offset).reverse, Vector.empty)
   }
 }
 
