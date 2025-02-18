@@ -13,6 +13,7 @@ ThisBuild / tlBaseVersion := "0.6"
 ThisBuild / crossScalaVersions := supportedScalaVersions
 ThisBuild / scalaVersion := scala213
 ThisBuild / mimaFailOnNoPrevious := false
+ThisBuild / tlCiDependencyGraphJob := false
 
 lazy val root =
   project
