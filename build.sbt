@@ -1,5 +1,5 @@
-lazy val scala213 = "2.13.11"
-lazy val scala3 = "3.3.0"
+lazy val scala213 = "2.13.16"
+lazy val scala3 = "3.3.5"
 lazy val supportedScalaVersions = List(scala213, scala3)
 
 ThisBuild / organization := "org.sqids"
@@ -9,10 +9,11 @@ ThisBuild / licenses := Seq(License.MIT)
 ThisBuild / developers ++= List(
   tlGitHubDev("jesperoman", "Jesper Öman")
 )
-ThisBuild / tlBaseVersion := "0.5"
+ThisBuild / tlBaseVersion := "0.6"
 ThisBuild / crossScalaVersions := supportedScalaVersions
 ThisBuild / scalaVersion := scala213
-ThisBuild / tlSonatypeUseLegacyHost := false
+ThisBuild / mimaFailOnNoPrevious := false
+ThisBuild / tlCiDependencyGraphJob := false
 
 lazy val root =
   project
