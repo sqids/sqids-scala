@@ -12,7 +12,7 @@ import sqids.Utils.StringOps
 
 sealed abstract case class Alphabet(value: Vector[Char]) {
   def length = value.length
-  def indexOf(c: Char) = value.indexOf(c.toInt)
+  def indexOf(c: Char) = value.indexOf(c)
   def prefix = value.head
   def separator: Char = value.head
   def removeSeparator: Alphabet = new Alphabet(value.tail) {}
@@ -55,7 +55,7 @@ sealed abstract case class Alphabet(value: Vector[Char]) {
         }
     ) {}
 
-  def offsetFromPrefix(prefix: Char) = value.indexOf(prefix.toInt)
+  def offsetFromPrefix(prefix: Char) = value.indexOf(prefix)
 
   def getOffset(numbers: List[Long], increment: Int): Int =
     (numbers.indices.foldLeft(numbers.length) { (offset, i) =>

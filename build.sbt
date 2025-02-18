@@ -1,5 +1,5 @@
-lazy val scala213 = "2.13.11"
-lazy val scala3 = "3.3.0"
+lazy val scala213 = "2.13.16"
+lazy val scala3 = "3.3.5"
 lazy val supportedScalaVersions = List(scala213, scala3)
 
 ThisBuild / organization := "org.sqids"
