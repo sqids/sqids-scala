@@ -6,5 +6,9 @@
 metals.sbt
 project/project
 
+.idea
+.idea_modules
+/.worksheet/
+
 target
 build
