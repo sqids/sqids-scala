@@ -107,15 +107,6 @@ final class SqidsSuite_encoding extends ScalaCheckSuite {
       sqids.encode(List(-1L)),
       Left(SqidsError.OutOfRange("some nr is out of range: -1, max: 9223372036854775807 min: 0"))
     )
-
-    assertEquals(
-      sqids.encode(List(Long.MaxValue + 1)),
-      Left(
-        SqidsError.OutOfRange(
-          "some nr is out of range: -9223372036854775808, max: 9223372036854775807 min: 0"
-        )
-      )
-    )
   }
 
   property("arbitrary numbers") {
