@@ -9,10 +9,9 @@ ThisBuild / licenses := Seq(License.MIT)
 ThisBuild / developers ++= List(
   tlGitHubDev("jesperoman", "Jesper Öman")
 )
-ThisBuild / tlBaseVersion := "0.5"
+ThisBuild / tlBaseVersion := "0.6"
 ThisBuild / crossScalaVersions := supportedScalaVersions
 ThisBuild / scalaVersion := scala213
-ThisBuild / tlSonatypeUseLegacyHost := false
 ThisBuild / mimaFailOnNoPrevious := false
 
 lazy val root =
