@@ -34,7 +34,7 @@ Not good for:
 Include in build.sbt:
 
 ```scala
-libraryDependencies ++= "org.sqids" %% "sqids" % "0.5.0"
+libraryDependencies ++= "org.sqids" %% "sqids" % "0.6.0"
 ```
 
 ## 👩‍💻 Examples
