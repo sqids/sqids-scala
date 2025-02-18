@@ -164,6 +164,8 @@ jobs:
 
   dependency-submission:
     name: Submit Dependencies
+    permissions:
+      contents: write
     if: github.event.repository.fork == false && github.event_name != 'pull_request'
     strategy:
       matrix:
