@@ -13,6 +13,7 @@ ThisBuild / tlBaseVersion := "0.5"
 ThisBuild / crossScalaVersions := supportedScalaVersions
 ThisBuild / scalaVersion := scala213
 ThisBuild / tlSonatypeUseLegacyHost := false
+ThisBuild / mimaFailOnNoPrevious := false
 
 lazy val root =
   project
