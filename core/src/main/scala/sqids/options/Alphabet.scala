@@ -8,6 +8,7 @@ package sqids.options
 
 import scala.annotation.tailrec
 import sqids.SqidsError
+import sqids.Utils.StringOps
 
 sealed abstract case class Alphabet(value: Vector[Char]) {
   def length = value.length
@@ -16,7 +17,7 @@ sealed abstract case class Alphabet(value: Vector[Char]) {
   def separator: Char = value.head
   def removeSeparator: Alphabet = new Alphabet(value.tail) {}
   def splitAtSeparator(id: String): Either[String, (String, String)] =
-    (id.takeWhile(_ != separator), id.dropWhile(_ != separator).tail) match {
+    (id.takeWhile(_ != separator), id.dropWhile(_ != separator).tailOrEmpty) match {
       case (first, _) if first.exists(!removeSeparator.value.contains(_)) =>
         Left("First part have invalid characters")
       case res => Right(res)
